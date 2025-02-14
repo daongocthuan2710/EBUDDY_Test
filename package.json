@@ -1,0 +1,21 @@
+{
+  "name": "my-monorepo",
+  "version": "1.0.0",
+  "packageManager": "npm@10.7.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "build:frontend": "turbo run build --filter=apps/frontend-repo",
+    "build:backend": "turbo run build --filter=apps/backend-repo",
+    "start": "turbo run start",
+    "dev": "turbo run dev"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.1",
+    "typescript": "^5.7.3"
+  }
+}
