@@ -1,11 +1,12 @@
 import admin from "firebase-admin";
-import { ServiceAccount } from "firebase-admin";
-
-const serviceAccount: ServiceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://backend-repo-9fff9.firebaseio.com",
+  credential: admin.credential.cert({
+    projectId: process.env.FB_PROJECT_ID,
+    privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    clientEmail: process.env.FB_CLIENT_EMAIL,
+  }),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
 const db = admin.firestore();
