@@ -3,23 +3,34 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-  "build": "tsc -p tsconfig.json",
-  "start": "node dist/index.js",
-  "dev": "nodemon src/core/app.ts",
-  "lint": "eslint . --ext .ts",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/core/app.ts",
+    "lint": "eslint . --ext .ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@my-monorepo/lib": "*",
+    "@types/lodash": "^4.17.15",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase-admin": "^13.1.0",
-    "@my-monorepo/lib": "*"
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^22.13.1",
     "@typescript-eslint/eslint-plugin": "^8.24.0",
     "@typescript-eslint/parser": "^8.24.0",
