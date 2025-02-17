@@ -52,7 +52,7 @@ export const listAllUsers: RequestHandler = async (req, res) => {
       : 10;
 
     const sort = (req.query.sort as string) || "updatedAt";
-    const az = (req.query.az as "asc" | "desc") || "asc";
+    const az = (req.query.az as "asc" | "desc") || "desc";
     const { data, totalRows } = await userRepository.getAllUsers({
       page,
       limit,

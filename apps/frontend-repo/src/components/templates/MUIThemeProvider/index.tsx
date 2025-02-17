@@ -5,7 +5,7 @@ import { ReactNode, useMemo, useState, createContext, useContext } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 
 // Constants
-import { THEMES, LIGHT_THEME, DARK_THEME } from "../../constants/theme";
+import { THEMES, LIGHT_THEME, DARK_THEME } from "../../../constants/theme";
 
 interface ThemeContextProps {
   themeMode: string;

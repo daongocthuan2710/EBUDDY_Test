@@ -8,4 +8,5 @@ export interface TUser {
   totalAverageWeightRatings?: number;
   numberOfRents?: number;
   recentlyActive?: string;
+  potentialScore?: number;
 }

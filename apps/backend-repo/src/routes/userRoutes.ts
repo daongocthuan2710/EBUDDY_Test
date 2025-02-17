@@ -10,7 +10,7 @@ import {
 import { register, login } from "../controller/auth";
 
 // Middlewares
-import { authMiddleware } from "../middleware/authMiddleware";
+import { authMiddleware } from "../middleware";
 
 const router = express.Router();
 

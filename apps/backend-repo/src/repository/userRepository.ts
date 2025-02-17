@@ -1,6 +1,6 @@
 // Libraries
 import bcrypt from "bcrypt";
-import { omit } from "lodash";
+import { isNumber, omit } from "lodash";
 
 // Config
 import { db } from "../config/firebaseConfig";
@@ -21,12 +21,11 @@ interface TGetAllUsersResult {
 }
 
 export class UserRepository {
-  private collectionName = "USERS";
+  private collectionRef = db.collection("USERS");
 
   public async findByEmail(email: string): Promise<TUser | null> {
     try {
-      const snapshot = await db
-        .collection(this.collectionName)
+      const snapshot = await this.collectionRef
         .where("email", "==", email)
         .limit(1)
         .get();
@@ -65,10 +64,20 @@ export class UserRepository {
         createdAt: now,
         updatedAt: now,
       };
-      const docRef = await db.collection(this.collectionName).add(newUser);
+      const docRef = await this.collectionRef.add(newUser);
       return docRef.id;
     } catch (error) {
       throw new Error("Failed to create user in repository");
+    }
+  }
+
+  public async setPotentialScoreDefaults() {
+    const snapshot = await this.collectionRef.get();
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      if (typeof data.potentialScore !== "number") {
+        await doc.ref.update({ potentialScore: 0 });
+      }
     }
   }
 
@@ -78,21 +87,25 @@ export class UserRepository {
     const { page, limit, sort, az } = params;
 
     try {
-      let query = db.collection(this.collectionName).orderBy(sort, az);
-      const totalSnapshot = await db.collection(this.collectionName).get();
+      const offset = (page - 1) * limit;
+      const snapshot = await this.collectionRef
+        .orderBy("potentialScore", "desc")
+        // .orderBy(sort, az)
+        .offset(offset)
+        .limit(limit)
+        .get();
+
+      const totalSnapshot = await this.collectionRef.get();
       const totalRows = totalSnapshot.size;
 
-      const offset = (page - 1) * limit;
-      const snapshot = await query.offset(offset).limit(limit).get();
       const data: TUser[] = [];
       snapshot.forEach((doc) => {
         const user = {
-          ...(doc.data() as TUser),
+          ...(doc.data() as Omit<TUser, "id">),
           id: doc.id,
         };
         data.push(omit(user, ["password"]));
       });
-
       return { data, totalRows };
     } catch (error) {
       throw new Error("Failed to get user list");
@@ -101,7 +114,7 @@ export class UserRepository {
 
   public async getUserById(id: string): Promise<TUser | null> {
     try {
-      const docRef = db.collection(this.collectionName).doc(id);
+      const docRef = this.collectionRef.doc(id);
       const docSnap = await docRef.get();
 
       if (!docSnap.exists) {
@@ -120,22 +133,87 @@ export class UserRepository {
 
   public async updateUser(id: string, data: Partial<TUser>): Promise<boolean> {
     try {
-      const docRef = db.collection(this.collectionName).doc(id);
+      const docRef = this.collectionRef.doc(id);
       const docSnap = await docRef.get();
 
       if (!docSnap.exists) {
         return false;
       }
 
+      const oldData = docSnap.data() as TUser;
+
       const now = new Date().toISOString();
+
+      /** 
+       * Supports pagination to efficiently retrieve the highest potential users
+       * To determine the most potential user, we prioritize:
+          Total Average Weighted Ratings (highest priority)
+          Number of Rents
+          Recent Activity
+       **/
+      const totalAverageWeightedRatings =
+        data.totalAverageWeightRatings ??
+        oldData.totalAverageWeightRatings ??
+        0;
+      const numberOfRents = data.numberOfRents ?? oldData.numberOfRents ?? 0;
+      const recentlyActive = data.recentlyActive ?? oldData.recentlyActive ?? 0;
+      const recentlyActiveMs =
+        !!recentlyActive && !isNumber(recentlyActive)
+          ? new Date(recentlyActive).getTime()
+          : 0;
+
+      const potentialScore =
+        1000 * totalAverageWeightedRatings +
+        10 * numberOfRents +
+        0.000001 * recentlyActiveMs;
+
       await docRef.update({
         ...data,
+        potentialScore,
         updatedAt: now,
-      });
+      } as Omit<TUser, "id">);
 
       return true;
     } catch (error) {
       throw new Error("Failed to update user information");
+    }
+  }
+
+  public async updateRecentlyActive(id: string): Promise<boolean> {
+    try {
+      const docRef = this.collectionRef.doc(id);
+      const docSnap = await docRef.get();
+
+      if (!docSnap.exists) {
+        return false;
+      }
+      const oldData = docSnap.data() as TUser;
+      const now = new Date().toISOString();
+
+      /** 
+       * Supports pagination to efficiently retrieve the highest potential users
+       * To determine the most potential user, we prioritize:
+          Total Average Weighted Ratings (highest priority)
+          Number of Rents
+          Recent Activity
+       **/
+      const totalAverageWeightedRatings =
+        oldData.totalAverageWeightRatings ?? 0;
+      const numberOfRents = oldData.numberOfRents ?? 0;
+      const recentlyActiveMs = new Date(now).getTime();
+      const potentialScore =
+        1000 * totalAverageWeightedRatings +
+        10 * numberOfRents +
+        0.0000000000001 * recentlyActiveMs;
+
+      await docRef.update({
+        recentlyActive: now,
+        potentialScore,
+      });
+
+      return true;
+    } catch (error) {
+      throw new Error("Failed to update recentlyActive");
     }
   }
 }

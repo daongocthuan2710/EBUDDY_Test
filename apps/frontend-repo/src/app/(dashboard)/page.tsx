@@ -1,19 +1,42 @@
 "use client";
-import { useState } from "react";
-import { fetchUserData } from "../../apis/userApi";
 
-const UpdateButton = () => {
-  const [userData, setUserData] = useState(null);
+// Libraries
+import { Button } from "@mui/material";
 
-  const handleFetch = async () => {
-    const data = await fetchUserData();
-    setUserData(data);
+// Components
+import { Header } from "@/components/Layout";
+import { UserTable } from "./components";
+
+// Stores
+import { useAppDispatch } from "@/store/hooks";
+import { setMessage } from "@/store/reducers";
+
+// Constants
+import { QUERY_KEYS } from "@/constants/queries";
+
+const UpdateButton: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const handleClick = () => {
+    dispatch(setMessage(QUERY_KEYS.GET_USER_LIST));
   };
 
   return (
-    <div>
-      <button onClick={handleFetch}>Fetch User Data</button>
-      {userData && <pre>{JSON.stringify(userData, null, 2)}</pre>}
+    <div className="mb-4">
+      <Button
+        variant="contained"
+        sx={{
+          mt: 2,
+          backgroundColor: "#33a3dc",
+          color: "white",
+          "&:hover": {
+            backgroundColor: "#5abee8",
+          },
+        }}
+        onClick={handleClick}
+      >
+        Prefetch Data
+      </Button>
     </div>
   );
 };
@@ -21,8 +44,11 @@ const UpdateButton = () => {
 export default function DashboardPage() {
   return (
     <div>
-      <h1>Dashboard</h1>
-      <UpdateButton />
+      <Header />
+      <div className="p-4">
+        <UpdateButton />
+        <UserTable />
+      </div>
     </div>
   );
 }

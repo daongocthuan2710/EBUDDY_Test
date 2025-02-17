@@ -55,7 +55,7 @@ export const HTTP_STATUS = {
     message: "Resource not found",
   },
   NOT_ACCEPTABLE: {
-    code: 404,
+    code: 405,
     text: "NOT_ACCEPTABLE",
     message: "Not acceptable",
   },

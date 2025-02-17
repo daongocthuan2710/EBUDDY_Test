@@ -1,8 +1,8 @@
 "use client";
 
+import React from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { redirect } from "next/navigation";
-
-import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -10,30 +10,71 @@ import {
   Container,
   IconButton,
   InputAdornment,
-  Divider,
+  CircularProgress,
 } from "@mui/material";
-import { loginWithGoogle } from "../../../apis/authApi";
-import Image from "next/image";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { signIn } from "next-auth/react";
+import { useSnackbar } from "notistack";
+import { useRouter } from "next/navigation";
+
+interface ILoginForm {
+  email: string;
+  password: string;
+}
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
-  const handleClickShowPassword = () => setShowPassword((prev) => !prev);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const handleLogin = async () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ILoginForm>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit: SubmitHandler<ILoginForm> = async (formData) => {
     try {
-      const user = await loginWithGoogle();
-      console.log("User logged in:", user);
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+        callbackUrl: "/",
+      });
+      if (!result?.ok) {
+        enqueueSnackbar(result?.error || "Login failed!", {
+          variant: "error",
+          anchorOrigin: { vertical: "top", horizontal: "right" },
+          autoHideDuration: 2000,
+        });
+      } else {
+        enqueueSnackbar("Login successful!", {
+          variant: "success",
+          anchorOrigin: { vertical: "top", horizontal: "right" },
+          autoHideDuration: 2000,
+        });
+        redirect("/");
+      }
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Error during login:", error);
+      // enqueueSnackbar("Login failed!", {
+      //   variant: "error",
+      //   anchorOrigin: { vertical: "top", horizontal: "right" },
+      //   autoHideDuration: 2000,
+      // });
     }
   };
 
+  const handleClickShowPassword = () => setShowPassword((prev) => !prev);
+
   const onSignup = () => {
-    redirect("/register");
+    router.push("/register");
   };
 
   return (
@@ -47,7 +88,6 @@ export default function LoginPage() {
         position: "relative",
       }}
     >
-      {/* Title */}
       <Typography
         variant="h5"
         textAlign="center"
@@ -57,56 +97,81 @@ export default function LoginPage() {
         Login
       </Typography>
 
-      {/* Email Field */}
-      <TextField
-        fullWidth
-        label="Email"
-        variant="outlined"
-        margin="normal"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+      <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <TextField
+          fullWidth
+          label="Email"
+          variant="outlined"
+          margin="normal"
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^\S+@\S+$/i,
+              message: "Invalid email format",
+            },
+          })}
+          error={!!errors.email}
+          helperText={errors.email?.message}
+          autoComplete="off"
+        />
 
-      {/* Password Field */}
-      <TextField
-        fullWidth
-        label="Password"
-        variant="outlined"
-        margin="normal"
-        type={showPassword ? "text" : "password"}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={handleClickShowPassword} edge="end">
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
+        <TextField
+          fullWidth
+          label="Password"
+          variant="outlined"
+          margin="normal"
+          type={showPassword ? "text" : "password"}
+          {...register("password", {
+            required: "Password is required",
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters",
+            },
+          })}
+          error={!!errors.password}
+          helperText={errors.password?.message}
+          autoComplete="new-password"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleClickShowPassword} edge="end">
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        {/* 
+        <Typography
+          sx={{ textAlign: "right", mt: 1, cursor: "pointer", color: "blue" }}
+          onClick={() => console.log("Forgot Password")}
+        >
+          Forget password?
+        </Typography> */}
 
-      <Typography
-        sx={{ textAlign: "right", mt: 1, cursor: "pointer", color: "blue" }}
-        onClick={() => console.log("Forgot Password")}
-      >
-        Forget password?
-      </Typography>
+        <Button
+          fullWidth
+          variant="contained"
+          color="error"
+          sx={{
+            mt: 2,
+            backgroundColor: "#33a3dc",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#5abee8",
+            },
+          }}
+          type="submit"
+          disabled={isSubmitting}
+        >
+          Sign in
+          {isSubmitting && <CircularProgress className="ml-2" size={20} />}
+        </Button>
+      </form>
 
-      <Button
-        fullWidth
-        variant="contained"
-        color="error"
-        sx={{ mt: 2 }}
-        onClick={handleLogin}
-      >
-        Sign in
-      </Button>
+      {/* <Divider sx={{ my: 2 }}>OR</Divider> */}
 
-      <Divider sx={{ my: 2 }}>OR</Divider>
-
-      <Button
+      {/* <Button
         fullWidth
         variant="contained"
         sx={{
@@ -125,9 +190,9 @@ export default function LoginPage() {
         onClick={() => console.log("Login with Facebook")}
       >
         Continue with Facebook
-      </Button>
+      </Button> */}
 
-      <Button
+      {/* <Button
         fullWidth
         variant="outlined"
         sx={{ mt: 1, borderColor: "#ddd", color: "#333" }}
@@ -142,13 +207,13 @@ export default function LoginPage() {
         onClick={() => console.log("Login with Google")}
       >
         Continue with Google
-      </Button>
+      </Button> */}
 
       <Typography textAlign="center" sx={{ mt: 2, fontSize: 14 }}>
         I don’t have an account?{" "}
         <Typography
           component="span"
-          sx={{ color: "blue", cursor: "pointer" }}
+          sx={{ color: "#1877f2", cursor: "pointer", fontSize: 14 }}
           onClick={onSignup}
         >
           Sign up

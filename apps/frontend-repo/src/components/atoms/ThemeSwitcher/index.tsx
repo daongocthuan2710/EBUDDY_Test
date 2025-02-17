@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@mui/material";
-import { useCustomTheme } from "../MUIThemeProvider";
+import { useCustomTheme } from "../../templates/MUIThemeProvider";
 
 export const ThemeSwitcher: React.FC = () => {
   const { themeMode, toggleTheme } = useCustomTheme();

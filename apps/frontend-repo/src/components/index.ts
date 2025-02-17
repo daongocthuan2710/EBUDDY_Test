@@ -1,3 +1,2 @@
-export { LoginForm } from "./LoginForm";
-export { MUIThemeProvider, useCustomTheme } from "./MUIThemeProvider";
-export { ThemeSwitcher } from "./ThemeSwitcher";
+export * from "./atoms";
+export * from "./templates";

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -13,14 +13,21 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
+    "@my-monorepo/lib": "*",
     "@reduxjs/toolkit": "^2.5.1",
+    "@tanstack/react-query": "^5.66.3",
+    "@tanstack/react-query-devtools": "^5.66.3",
     "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
     "firebase": "^11.3.1",
+    "lodash": "^4.17.21",
     "next": "15.1.7",
+    "next-auth": "^4.24.11",
+    "notistack": "^3.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-redux": "^9.2.0",
-    "@my-monorepo/lib": "*"
+    "react-hook-form": "^7.54.2",
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
