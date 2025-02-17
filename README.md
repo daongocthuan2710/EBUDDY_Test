@@ -14,12 +14,12 @@
 
 - Answer: I have consolidated the source code from the frontend repo, backend repo, and packages libraries into a single monorepo
 
-### Part 4 - Front-end Setup:
+### Part 4 - Bonus Firebase technical questions:
 
 - Question 1: How should we structure a Firestore query that supports pagination to efficiently retrieve the highest potential users? Please include all mathematical formulas used in the query
 - Answer:
 
-  - I added a new field called "potentialScore" and sort by it in descending order to determine the most potential user. The formula for computing "potentialScore" is:
+  - I added a new field called "potentialScore" and sorted it in descending order to determine the most potential user. The formula for computing "potentialScore" is:
   - potentialScore = totalAverageWeightRatings \_ 1000 (highest priority) + numberOfRents \* 10 + recentlyActive \* 0.0000000000001.
   - This prioritizes the fields in descending order from totalAverageWeightRatings to numberOfRents to recentlyActive. The "potentialScore" field is recalculated whenever any of those three fields changes.
 
