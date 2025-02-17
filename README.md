@@ -66,6 +66,8 @@
 - Sign out with NextAuth
 - Display user listing with pagination and sort by potential user
 - Update user information
+- Get user details
+
 - Export common packages
 
 ### UI:
