@@ -165,7 +165,7 @@ export class UserRepository {
       const potentialScore =
         1000 * totalAverageWeightedRatings +
         10 * numberOfRents +
-        0.000001 * recentlyActiveMs;
+        0.0000000000001 * recentlyActiveMs;
 
       await docRef.update({
         ...data,
